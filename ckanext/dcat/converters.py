@@ -1,5 +1,6 @@
 from past.builtins import basestring
 import logging
+import json
 
 log = logging.getLogger(__name__)
 
@@ -50,6 +51,31 @@ def dcat_to_ckan(dcat_dict):
             except ValueError:
                 pass
         package_dict['resources'].append(resource)
+
+    if 'spatial' in dcat_dict:
+        # see if it is a bounding box
+        parts = dcat_dict['spatial'].split(',')
+        if len(parts) == 4:
+            bbox = None
+            try:
+                bbox = [float(x) for x in parts]
+            except ValueError as e:
+                print('Spatial number was not a float:', parts)
+                pass
+        else:
+            print('Unknown spatial format:', dcat_dict['spatial'])
+
+        if bbox:
+            # construct 5 point polygon
+            package_dict['extras'].append({ 'key': 'spatial', 'value': json.dumps({
+                'type': 'Polygon',
+                'coordinates': [[[bbox[0],bbox[1]],
+                                 [bbox[0],bbox[3]],
+                                 [bbox[2],bbox[3]],
+                                 [bbox[2],bbox[1]],
+                                 [bbox[0],bbox[1]]]]
+            })})
+
 
     return package_dict
 
