@@ -53,10 +53,12 @@ def dcat_to_ckan(dcat_dict):
         package_dict['resources'].append(resource)
 
     if 'spatial' in dcat_dict:
+
+        bbox = None
+                
         # see if it is a bounding box
         parts = dcat_dict['spatial'].split(',')
         if len(parts) == 4:
-            bbox = None
             try:
                 bbox = [float(x) for x in parts]
             except ValueError as e:
